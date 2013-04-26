@@ -1,4 +1,5 @@
 require 'omniauth'
+require 'base64'
 
 module OmniAuth
   module Strategies
@@ -27,7 +28,25 @@ module OmniAuth
       end
 
       def nonce
-        ((full_host.gsub(/[\:\/]/, "X") + SecureRandom.uuid.gsub("-", "")).rjust 50, " ")[-50, 50]
+        return @nonce if @nonce
+        @nonce = ((full_host.gsub(/[\:\/]/, "X") + SecureRandom.uuid.gsub("-", "")).rjust 50, " ")[-50, 50]
+      end
+
+      def append_value_to_signature(value, signature = "")
+        signature << "#{value.to_s.bytesize.to_s.rjust(3, '0')}#{value}"
+      end
+
+      def signature_input
+        sig_str = append_value_to_signature(AUTH_SERVICE_ID)      # VK_SERVICE
+        append_value_to_signature(AUTH_SERVICE_VERSION, sig_str) # VK_VERSION
+        append_value_to_signature(options.snd_id, sig_str)       # VK_SND_ID
+        append_value_to_signature(options.rec_id, sig_str)       # VK_REC_ID
+        append_value_to_signature(nonce, sig_str)                # VK_NONCE
+        append_value_to_signature(callback_url, sig_str)         # VK_RETURN
+      end
+
+      def signature (priv_key)
+        Base64.encode64(priv_key.sign(OpenSSL::Digest::SHA1.new, signature_input))
       end
 
       def request_phase
@@ -44,7 +63,6 @@ module OmniAuth
           return FailureEndpoint.new(request.env).redirect_to_failure
         end
 
-        puts options.site
         OmniAuth.config.form_css = nil
         form = OmniAuth::Form.new(:title => "Please wait ...", :url => options.site)
 
@@ -55,7 +73,7 @@ module OmniAuth
         form.html "<input type=\"hidden\" name=\"VK_NONCE\" value=\"#{nonce}\" />"
         form.html "<input type=\"hidden\" name=\"VK_RETURN\" value=\"#{callback_url}\" />"
         form.html "<input type=\"hidden\" name=\"VK_LANG\" value=\"LAT\" />"
-        form.html "<input type=\"hidden\" name=\"VK_MAC\" value=\"test mac\" />"
+        form.html "<input type=\"hidden\" name=\"VK_MAC\" value=\"#{signature priv_key}\" />"
 
         form.button "Click here if not redirected automatically ..."
 
