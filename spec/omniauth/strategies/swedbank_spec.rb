@@ -1,13 +1,6 @@
 require 'spec_helper'
 
 describe OmniAuth::Strategies::Swedbank do
-  EXPECTED_VALUES = {
-    :VK_SERVICE => :"4002",
-    :VK_VERSION => :"008",
-    :VK_SND_ID => :MY_SND_ID,
-    :VK_REC_ID => :MY_REC_ID,
-    :VK_RETURN => :"http://example.org/auth/swedbank/callback"
-  }
 
   PRIVATE_KEY_FILE = File.join RSpec.configuration.cert_folder, "request.private.pem"
   PUBLIC_KEY_FILE = File.join RSpec.configuration.cert_folder, "response.public.pem"
@@ -24,6 +17,14 @@ describe OmniAuth::Strategies::Swedbank do
   let(:last_response_mac) { last_response.body.match(/name="VK_MAC" value="([^"]*)"/)[1] }
 
   context "request phase" do
+    EXPECTED_VALUES = {
+      :VK_SERVICE => :"4002",
+      :VK_VERSION => :"008",
+      :VK_SND_ID => :MY_SND_ID,
+      :VK_REC_ID => :MY_REC_ID,
+      :VK_RETURN => :"http://example.org/auth/swedbank/callback"
+    }
+
     before(:each){ get '/auth/swedbank' }
 
     it "displays a single form" do
@@ -61,6 +62,10 @@ describe OmniAuth::Strategies::Swedbank do
 
     context "with default options" do
       it "has the default action tag value" do
+        expect(last_response.body).to be_include("action='https://ib.swedbank.lv/banklink'")
+      end
+
+      it "has the default VK_LANG value" do
         expect(last_response.body).to be_include("action='https://ib.swedbank.lv/banklink'")
       end
     end
