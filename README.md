@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Omniauth::Swedbank
 
 TODO: Write a gem description
@@ -28,9 +27,3 @@ TODO: Write usage instructions here
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
-=======
-omniauth-swedbank
-=================
-
-OmniAuth strategy for Swedbank Banklink
->>>>>>> 522531e2b1f9f28273a6127fa71d738717be7102
