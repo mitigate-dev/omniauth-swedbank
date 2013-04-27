@@ -49,18 +49,58 @@ module OmniAuth
         Base64.encode64(priv_key.sign(OpenSSL::Digest::SHA1.new, signature_input))
       end
 
-      def request_phase
-        #return redirect_to_failure
+      uid do
+        request.params[:VK_INFO.to_s].match(/ISIK:(\d{6}\-\d{5})/)[1]
+      end
+
+      info do
+        {
+          :full_name => request.params[:VK_INFO.to_s].match(/NIMI:(.+)/)[1]
+        }
+      end
+
+      def callback_phase
         begin
-          #puts options.public_key_file
-          #puts options.private_key_file
-          pub_cert = OpenSSL::X509::Certificate.new(File.read(options.public_key_file || ""))
-          #puts "Certificate from file (#{options.public_key_file}): #{pub_cert}"
-          priv_key = OpenSSL::PKey::RSA.new(File.read(options.private_key_file))
-          #puts "Private key from file (#{options.private_key_file}): #{priv_key}"
-        rescue Errno::ENOENT
-          request.env['omniauth.error.type'] = "failedToLoadCerts"
-          return FailureEndpoint.new(request.env).redirect_to_failure
+          pub_key = OpenSSL::X509::Certificate.new(File.read(options.public_key_file || "")).public_key
+        rescue => e
+          return fail!(:public_key_load_err, e)
+        end
+
+        if request.params[:VK_SERVICE.to_s] != "3003"
+          return fail!(:unsupported_response_service_err)
+        end
+
+        if request.params[:VK_VERSION.to_s] != "008"
+          return fail!(:unsupported_response_version_err)
+        end
+
+        if request.params[:VK_ENCODING.to_s] != "UTF-8"
+          return fail!(:unsupported_response_encoding_err)
+        end
+
+        sig_str = append_value_to_signature(request.params[:VK_SERVICE.to_s])
+        append_value_to_signature(request.params[:VK_VERSION.to_s], sig_str)
+        append_value_to_signature(request.params[:VK_SND_ID.to_s], sig_str)
+        append_value_to_signature(request.params[:VK_REC_ID.to_s], sig_str)
+        append_value_to_signature(request.params[:VK_NONCE.to_s], sig_str)
+        append_value_to_signature(request.params[:VK_INFO.to_s], sig_str)
+
+        raw_signature = Base64.decode64(request.params[:VK_MAC.to_s])
+
+        if !pub_key.verify(OpenSSL::Digest::SHA1.new, raw_signature, sig_str)
+          return fail!(:invalid_response_signature_err)
+        end
+
+        super
+      rescue Exception => e
+        fail!(:unknown_callback_err, e)
+      end
+
+      def request_phase
+        begin
+          priv_key = OpenSSL::PKey::RSA.new(File.read(options.private_key_file || ""))
+        rescue => e
+          return fail!(:private_key_load_err, e)
         end
 
         OmniAuth.config.form_css = nil
@@ -81,6 +121,8 @@ module OmniAuth
           form.to_html.gsub("</form>", "</form><script type=\"text/javascript\">document.forms[0].submit();</script>"))
         #puts form.to_html
         form.to_response
+      rescue Exception => e
+        fail!(:unknown_request_err, e)
       end
     end
   end
