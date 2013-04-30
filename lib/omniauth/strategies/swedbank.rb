@@ -92,7 +92,7 @@ module OmniAuth
         end
 
         super
-      rescue Exception => e
+      rescue => e
         fail!(:unknown_callback_err, e)
       end
 
@@ -121,7 +121,7 @@ module OmniAuth
           form.to_html.gsub("</form>", "</form><script type=\"text/javascript\">document.forms[0].submit();</script>"))
         #puts form.to_html
         form.to_response
-      rescue Exception => e
+      rescue => e
         fail!(:unknown_request_err, e)
       end
     end
