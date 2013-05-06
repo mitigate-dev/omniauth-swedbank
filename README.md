@@ -3,6 +3,7 @@
 TODO: Write a gem description
 
 [![Gem Version](https://badge.fury.io/rb/omniauth-swedbank.png)](http://badge.fury.io/rb/omniauth-swedbank)
+[![Build Status](https://travis-ci.org/kirsis/omniauth-swedbank.png?branch=master)](https://travis-ci.org/kirsis/omniauth-swedbank)
 
 ## Installation
 
