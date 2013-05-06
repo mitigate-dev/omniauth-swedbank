@@ -2,6 +2,8 @@
 
 TODO: Write a gem description
 
+[![Gem Version](https://badge.fury.io/rb/omniauth-swedbank.png)](http://badge.fury.io/rb/omniauth-swedbank)
+
 ## Installation
 
 Add this line to your application's Gemfile:
