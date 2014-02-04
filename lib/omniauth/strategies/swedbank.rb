@@ -4,8 +4,8 @@ require 'base64'
 class String
   def prepend_length
     # prepend length to string in 0xx format
-    len = self.to_s.length
-    self.dup.to_s.force_encoding("ascii").prepend(len.to_s.rjust(3, '0'))
+
+    [ self.to_s.length.to_s.rjust(3, '0'), self.dup.to_s.force_encoding("ascii")].join
   end
 end
 
