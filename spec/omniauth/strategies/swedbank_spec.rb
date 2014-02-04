@@ -7,7 +7,7 @@ describe OmniAuth::Strategies::Swedbank do
 
   let(:app){ Rack::Builder.new do |b|
     b.use Rack::Session::Cookie, {:secret => "abc123"}
-    b.use(OmniAuth::Strategies::Swedbank, PRIVATE_KEY_FILE, PUBLIC_KEY_FILE, :"MY_SND_ID", :"MY_REC_ID")
+    b.use(OmniAuth::Strategies::Swedbank, PRIVATE_KEY_FILE, PUBLIC_KEY_FILE, "MY_SND_ID", "MY_REC_ID")
     b.run lambda{|env| [404, {}, ['Not Found']]}
   end.to_app }
 
@@ -18,11 +18,11 @@ describe OmniAuth::Strategies::Swedbank do
 
   context "request phase" do
     EXPECTED_VALUES = {
-      :VK_SERVICE => :"4002",
-      :VK_VERSION => :"008",
-      :VK_SND_ID => :MY_SND_ID,
-      :VK_REC_ID => :MY_REC_ID,
-      :VK_RETURN => :"http://example.org/auth/swedbank/callback"
+      "VK_SERVICE" => "4002",
+      "VK_VERSION" => "008",
+      "VK_SND_ID" =>  "MY_SND_ID",
+      "VK_REC_ID" =>  "MY_REC_ID",
+      "VK_RETURN" =>  "http://example.org/auth/swedbank/callback"
     }
 
     before(:each){ get '/auth/swedbank' }
@@ -54,7 +54,7 @@ describe OmniAuth::Strategies::Swedbank do
         "009MY_SND_ID" +  # VK_SND_ID
         "009MY_REC_ID" +  # VK_REC_ID
         "050" + last_response_nonce +  # VK_NONCE
-        "041#{EXPECTED_VALUES[:VK_RETURN]}"  # V_RETURN
+        "041#{EXPECTED_VALUES["VK_RETURN"]}"  # V_RETURN
 
       expected_mac = Base64.encode64(private_key.sign(OpenSSL::Digest::SHA1.new, sig_str))
       expect(last_response_mac).to eq(expected_mac)
@@ -73,7 +73,7 @@ describe OmniAuth::Strategies::Swedbank do
     context "with custom options" do
       let(:app){ Rack::Builder.new do |b|
         b.use Rack::Session::Cookie, {:secret => "abc123"}
-        b.use(OmniAuth::Strategies::Swedbank, PRIVATE_KEY_FILE, PUBLIC_KEY_FILE, :"MY_SND_ID", :"MY_REC_ID",
+        b.use(OmniAuth::Strategies::Swedbank, PRIVATE_KEY_FILE, PUBLIC_KEY_FILE, "MY_SND_ID", "MY_REC_ID",
           :site => "https://test.lv/banklink")
         b.run lambda{|env| [404, {}, ['Not Found']]}
       end.to_app }
@@ -86,7 +86,7 @@ describe OmniAuth::Strategies::Swedbank do
     context "with non-existant private key files" do
       let(:app){ Rack::Builder.new do |b|
         b.use Rack::Session::Cookie, {:secret => "abc123"}
-        b.use(OmniAuth::Strategies::Swedbank, "missing-private-key-file.pem", PUBLIC_KEY_FILE, :"MY_SND_ID", :"MY_REC_ID")
+        b.use(OmniAuth::Strategies::Swedbank, "missing-private-key-file.pem", PUBLIC_KEY_FILE, "MY_SND_ID", "MY_REC_ID")
         b.run lambda{|env| [404, {}, ['Not Found']]}
       end.to_app }
 
@@ -103,15 +103,15 @@ describe OmniAuth::Strategies::Swedbank do
     context "with valid response" do
       before do
         post :'/auth/swedbank/callback',
-          :VK_SERVICE => :'3003',
-          :VK_VERSION => :'008',
-          :VK_SND_ID => :"HP",
-          :VK_REC_ID => :"MY_REC_ID",
-          :VK_NONCE => :"pXXXlocalhostX3000b41292810c0345a7b3770b1c807bed7a",
-          :VK_INFO => :'ISIK:123456-12345;NIMI:Example User',
-          :VK_MAC => :"cmXyp2My7P9pTgrzqJeg7qH+NPCuyaiGNpQIrcCr6S44w0bH+Ao4WDViqytaPH2vENooVPXDSgOcBqHTg44gJ9FlrhI5StiouHVhjpCcWg+h/ERcyc8w58PjsEmdsd4BIpaGXNyhvcIKdWfNwYA1UCIrmFsPAPWfVeorNxp81E7pvY4p4zsqMF80YZ7/RdOpjrtuXJ4nYJ7d+2fXJKKmUlqArCc786DJdb/z8wVDSNA9BZxnf8EE6s//p9gzqLPAg/T9Xp/2024n2JtC6kwsWF614bn64LEZz5c8owZth6FV+2fjnzHxOiifOe+jc9SRstCLITK6Y0j+6n8auiEZ5g==",
-          :VK_ENCODING => :'UTF-8',
-          :VK_LANG => :'LAT'
+          "VK_SERVICE" =>   '3003',
+          "VK_VERSION" =>   '008',
+          "VK_SND_ID" =>    "HP",
+          "VK_REC_ID" =>    "MY_REC_ID",
+          "VK_NONCE" =>     "pXXXlocalhostX3000b41292810c0345a7b3770b1c807bed7a",
+          "VK_INFO" =>      'ISIK:123456-12345;NIMI:Example User',
+          "VK_MAC" =>       "cmXyp2My7P9pTgrzqJeg7qH+NPCuyaiGNpQIrcCr6S44w0bH+Ao4WDViqytaPH2vENooVPXDSgOcBqHTg44gJ9FlrhI5StiouHVhjpCcWg+h/ERcyc8w58PjsEmdsd4BIpaGXNyhvcIKdWfNwYA1UCIrmFsPAPWfVeorNxp81E7pvY4p4zsqMF80YZ7/RdOpjrtuXJ4nYJ7d+2fXJKKmUlqArCc786DJdb/z8wVDSNA9BZxnf8EE6s//p9gzqLPAg/T9Xp/2024n2JtC6kwsWF614bn64LEZz5c8owZth6FV+2fjnzHxOiifOe+jc9SRstCLITK6Y0j+6n8auiEZ5g==",
+          "VK_ENCODING" =>  'UTF-8',
+          "VK_LANG" =>      'LAT'
       end
 
       it "sets the correct uid value in the auth hash" do
@@ -141,15 +141,15 @@ describe OmniAuth::Strategies::Swedbank do
 
       it "detects invalid signature" do
         post :'/auth/swedbank/callback',
-          :VK_SERVICE => :'3003',
-          :VK_VERSION => :'008',
-          :VK_SND_ID => :"HP",
-          :VK_REC_ID => :"MY_REC_ID",
-          :VK_NONCE => :'pXXXlocalhostX3000df346e9e453d43cd9c3c4076030d9e54',
-          :VK_INFO => :'ISIK:123456-12345;NIMI:Example User',
-          :VK_MAC => "invalid signature",
-          :VK_ENCODING => :'UTF-8',
-          :VK_LANG => :'LAT'
+          "VK_SERVICE" =>   '3003',
+          "VK_VERSION" =>   '008',
+          "VK_SND_ID" =>    "HP",
+          "VK_REC_ID" =>    "MY_REC_ID",
+          "VK_NONCE" =>     'pXXXlocalhostX3000df346e9e453d43cd9c3c4076030d9e54',
+          "VK_INFO" =>      'ISIK:123456-12345;NIMI:Example User',
+          "VK_MAC" =>       "invalid signature",
+          "VK_ENCODING" =>  'UTF-8',
+          "VK_LANG" =>      'LAT'
 
         expect(last_response.status).to eq(302)
         expect(last_response.headers["Location"]).to eq("/auth/failure?message=invalid_response_signature_err&strategy=swedbank")
@@ -157,15 +157,15 @@ describe OmniAuth::Strategies::Swedbank do
 
       it "detects unsupported VK_SERVICE values" do
         post :'/auth/swedbank/callback',
-          :VK_SERVICE => :'3004',
-          :VK_VERSION => :'008',
-          :VK_SND_ID => :"HP",
-          :VK_REC_ID => :"MY_REC_ID",
-          :VK_NONCE => :'pXXXlocalhostX3000df2afdbd66ee4c3a998b72cfd3d7d131',
-          :VK_INFO => :'ISIK:123456-12345;NIMI:Example User',
-          :VK_MAC => :"tzGu5AxwaEMwAjkY8zh796NQ45QSEshuFiT0VnOdDN3gZPYlAcmm5jPs+j17U1rCKvz6tdKn9I8u+OUcV95+1Sa34dZ/09KrUgwDrOej/djJZ2lg5MgGLAftDsRomcCCuBppQvjdzhCvNeA2OAWPbl7Enn6HVjvb3esJY6D80bYIPm48DHDhhHbdcSwHubFeizyw9syviFsN3xVkhr5YS7W1/owXh/jeHSf8cqLVSzRyShU/JnJfevNsXDpSHbphA5Q4n5q5y0EcuA6/wW2qc2o5nKQjDDhZgxkWYKz6YpVj8zC2x/LXUkmJ+r1K0Slw2lhwEcP2tgIdThkAaT8MYQ==",
-          :VK_ENCODING => :'UTF-8',
-          :VK_LANG => :'LAT'
+          "VK_SERVICE" =>   '3004',
+          "VK_VERSION" =>   '008',
+          "VK_SND_ID" =>    "HP",
+          "VK_REC_ID" =>    "MY_REC_ID",
+          "VK_NONCE" =>     'pXXXlocalhostX3000df2afdbd66ee4c3a998b72cfd3d7d131',
+          "VK_INFO" =>      'ISIK:123456-12345;NIMI:Example User',
+          "VK_MAC" =>       "tzGu5AxwaEMwAjkY8zh796NQ45QSEshuFiT0VnOdDN3gZPYlAcmm5jPs+j17U1rCKvz6tdKn9I8u+OUcV95+1Sa34dZ/09KrUgwDrOej/djJZ2lg5MgGLAftDsRomcCCuBppQvjdzhCvNeA2OAWPbl7Enn6HVjvb3esJY6D80bYIPm48DHDhhHbdcSwHubFeizyw9syviFsN3xVkhr5YS7W1/owXh/jeHSf8cqLVSzRyShU/JnJfevNsXDpSHbphA5Q4n5q5y0EcuA6/wW2qc2o5nKQjDDhZgxkWYKz6YpVj8zC2x/LXUkmJ+r1K0Slw2lhwEcP2tgIdThkAaT8MYQ==",
+          "VK_ENCODING" =>  'UTF-8',
+          "VK_LANG" =>      'LAT'
 
         expect(last_response.status).to eq(302)
         expect(last_response.headers["Location"]).to eq("/auth/failure?message=unsupported_response_service_err&strategy=swedbank")
@@ -173,15 +173,15 @@ describe OmniAuth::Strategies::Swedbank do
 
       it "detects unsupported VK_VERSION values" do
         post :'/auth/swedbank/callback',
-          :VK_SERVICE => :'3003',
-          :VK_VERSION => :'009',
-          :VK_SND_ID => :"HP",
-          :VK_REC_ID => :"MY_REC_ID",
-          :VK_NONCE => :'pXXXlocalhostX300023f78258d685424584f4e859b5d480f5',
-          :VK_INFO => :'ISIK:123456-12345;NIMI:Example User',
-          :VK_MAC => :"0KACnfCZZW2pQnFGttOXMrQRnmYQj45SwqIa5SbKhybJlP1GaXaoa5VYa+xGAnizx+YKbYQsXchXbeNIlQNrQ8/gedByzJtNFI4s4VIaU0tp7P83BjbzYfSMwvIImZvlFyVPgey8Va06fPGi+jdoUp7Dr8vwf6eAzxQhyVjEEYVR+axkAJP9+driMqTKQaxMlctWnivxf8stjI1ElmcdurndLbVnmHLTw6AichmzqUfvfXE3wh4XCVZtD+7VBPvbn4eKXif61cNfkOO/+nNap1buW8RLQirL7Eis//MmWoGSW8H5605DAAK9Ui7CNoB279Ww05pY4wsP7KZdiJ4WCA==",
-          :VK_ENCODING => :'UTF-8',
-          :VK_LANG => :'LAT'
+          "VK_SERVICE" =>   '3003',
+          "VK_VERSION" =>   '009',
+          "VK_SND_ID" =>    "HP",
+          "VK_REC_ID" =>    "MY_REC_ID",
+          "VK_NONCE" =>     'pXXXlocalhostX300023f78258d685424584f4e859b5d480f5',
+          "VK_INFO" =>      'ISIK:123456-12345;NIMI:Example User',
+          "VK_MAC" =>       "0KACnfCZZW2pQnFGttOXMrQRnmYQj45SwqIa5SbKhybJlP1GaXaoa5VYa+xGAnizx+YKbYQsXchXbeNIlQNrQ8/gedByzJtNFI4s4VIaU0tp7P83BjbzYfSMwvIImZvlFyVPgey8Va06fPGi+jdoUp7Dr8vwf6eAzxQhyVjEEYVR+axkAJP9+driMqTKQaxMlctWnivxf8stjI1ElmcdurndLbVnmHLTw6AichmzqUfvfXE3wh4XCVZtD+7VBPvbn4eKXif61cNfkOO/+nNap1buW8RLQirL7Eis//MmWoGSW8H5605DAAK9Ui7CNoB279Ww05pY4wsP7KZdiJ4WCA==",
+          "VK_ENCODING" =>  'UTF-8',
+          "VK_LANG" =>      'LAT'
 
         expect(last_response.status).to eq(302)
         expect(last_response.headers["Location"]).to eq("/auth/failure?message=unsupported_response_version_err&strategy=swedbank")
@@ -189,15 +189,15 @@ describe OmniAuth::Strategies::Swedbank do
 
       it "detects unsupported VK_ENCODING values" do
         post :'/auth/swedbank/callback',
-          :VK_SERVICE => :'3003',
-          :VK_VERSION => :'008',
-          :VK_SND_ID => :"HP",
-          :VK_REC_ID => :"MY_REC_ID",
-          :VK_NONCE => :"pXXXlocalhostX3000b41292810c0345a7b3770b1c807bed7a",
-          :VK_INFO => :'ISIK:123456-12345;NIMI:Example User',
-          :VK_MAC => :"cmXyp2My7P9pTgrzqJeg7qH+NPCuyaiGNpQIrcCr6S44w0bH+Ao4WDViqytaPH2vENooVPXDSgOcBqHTg44gJ9FlrhI5StiouHVhjpCcWg+h/ERcyc8w58PjsEmdsd4BIpaGXNyhvcIKdWfNwYA1UCIrmFsPAPWfVeorNxp81E7pvY4p4zsqMF80YZ7/RdOpjrtuXJ4nYJ7d+2fXJKKmUlqArCc786DJdb/z8wVDSNA9BZxnf8EE6s//p9gzqLPAg/T9Xp/2024n2JtC6kwsWF614bn64LEZz5c8owZth6FV+2fjnzHxOiifOe+jc9SRstCLITK6Y0j+6n8auiEZ5g==",
-          :VK_ENCODING => :'ASCII',
-          :VK_LANG => :'LAT'
+          "VK_SERVICE" =>   '3003',
+          "VK_VERSION" =>   '008',
+          "VK_SND_ID" =>    "HP",
+          "VK_REC_ID" =>    "MY_REC_ID",
+          "VK_NONCE" =>     "pXXXlocalhostX3000b41292810c0345a7b3770b1c807bed7a",
+          "VK_INFO" =>      'ISIK:123456-12345;NIMI:Example User',
+          "VK_MAC" =>       "cmXyp2My7P9pTgrzqJeg7qH+NPCuyaiGNpQIrcCr6S44w0bH+Ao4WDViqytaPH2vENooVPXDSgOcBqHTg44gJ9FlrhI5StiouHVhjpCcWg+h/ERcyc8w58PjsEmdsd4BIpaGXNyhvcIKdWfNwYA1UCIrmFsPAPWfVeorNxp81E7pvY4p4zsqMF80YZ7/RdOpjrtuXJ4nYJ7d+2fXJKKmUlqArCc786DJdb/z8wVDSNA9BZxnf8EE6s//p9gzqLPAg/T9Xp/2024n2JtC6kwsWF614bn64LEZz5c8owZth6FV+2fjnzHxOiifOe+jc9SRstCLITK6Y0j+6n8auiEZ5g==",
+          "VK_ENCODING" =>  'ASCII',
+          "VK_LANG" =>      'LAT'
 
         expect(last_response.status).to eq(302)
         expect(last_response.headers["Location"]).to eq("/auth/failure?message=unsupported_response_encoding_err&strategy=swedbank")
