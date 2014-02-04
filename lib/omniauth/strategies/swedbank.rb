@@ -35,8 +35,6 @@ module OmniAuth
       end
 
       def nonce
-        return "test nonce"
-
         return @nonce if @nonce
         @nonce = ((full_host.gsub(/[\:\/]/, "X") + SecureRandom.uuid.gsub("-", "")).rjust 50, " ")[-50, 50]
       end
