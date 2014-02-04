@@ -6,8 +6,8 @@ require 'omniauth/swedbank/version'
 Gem::Specification.new do |spec|
   spec.name          = "omniauth-swedbank"
   spec.version       = Omniauth::Swedbank::VERSION
-  spec.authors       = ["Jānis Kiršteins"]
-  spec.email         = ["janis@montadigital.com"]
+  spec.authors       = ["Jānis Kiršteins", "Kristaps Ērglis"]
+  spec.email         = ["janis@montadigital.com", "kristaps.erglis@gmail.com" ]
   spec.description   = %q{OmniAuth strategy for Swedbank Banklink}
   spec.summary       = %q{OmniAuth strategy for Swedbank Banklink}
   spec.homepage      = ""
@@ -23,4 +23,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec', '~> 2.7'
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "rake"
+  spec.add_development_dependency "i18n"
+
 end
