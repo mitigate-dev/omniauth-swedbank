@@ -1,9 +1,13 @@
 # Omniauth::Swedbank
 
-TODO: Write a gem description
+Omniauth strategy for using Swedbank as an authentication service provider.
+
+This implementation works in Latvia, and should work in Estonia and Lithuania.
 
 [![Gem Version](https://badge.fury.io/rb/omniauth-swedbank.png)](http://badge.fury.io/rb/omniauth-swedbank)
 [![Build Status](https://travis-ci.org/kirsis/omniauth-swedbank.png?branch=master)](https://travis-ci.org/kirsis/omniauth-swedbank)
+
+Supported Ruby versions: 1.9.3 and 2.0.0
 
 ## Installation
 
