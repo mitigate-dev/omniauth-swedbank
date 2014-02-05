@@ -9,6 +9,10 @@ This implementation works in Latvia, and should work in Estonia and Lithuania.
 
 Supported Ruby versions: 1.9.2, 1.9.3 and 2.0.0
 
+## Related projects
+
+- [omniauth-nordea](http://github.com/kirsis/omniauth-nordea) - strategy for authenticating with Nordea bank in the Baltic states
+
 ## Installation
 
 Add this line to your application's Gemfile:
