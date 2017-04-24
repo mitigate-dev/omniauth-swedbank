@@ -44,7 +44,7 @@ describe OmniAuth::Strategies::Swedbank do
     end
 
     it "has a 50 byte long nonce field value" do
-      expect(last_response_nonce.bytesize).to eq(50)
+      expect(last_response_nonce.bytesize).to eq(20)
     end
 
     it "has a correct VK_MAC signature" do
@@ -53,7 +53,7 @@ describe OmniAuth::Strategies::Swedbank do
         "003008" +  # VK_VERSION
         "009MY_SND_ID" +  # VK_SND_ID
         "009MY_REC_ID" +  # VK_REC_ID
-        "050" + last_response_nonce +  # VK_NONCE
+        "020" + last_response_nonce +  # VK_NONCE
         "041#{EXPECTED_VALUES["VK_RETURN"]}"  # V_RETURN
 
       expected_mac = Base64.encode64(private_key.sign(OpenSSL::Digest::SHA1.new, sig_str))
