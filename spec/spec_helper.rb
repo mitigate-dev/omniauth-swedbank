@@ -7,7 +7,7 @@ require 'omniauth-swedbank'
 
 RSpec.configure do |config|
   config.add_setting('cert_folder')
-  config.cert_folder = File.expand_path('../../certs', __FILE__)
+  config.cert_folder = File.expand_path('../certs', __FILE__)
 
   config.include Rack::Test::Methods
   config.extend  OmniAuth::Test::StrategyMacros, :type => :strategy

@@ -102,7 +102,7 @@ describe OmniAuth::Strategies::Swedbank do
 
     context "with valid response" do
       before do
-        post :'/auth/swedbank/callback',
+        post '/auth/swedbank/callback',
           "VK_SERVICE" =>   '3003',
           "VK_VERSION" =>   '008',
           "VK_SND_ID" =>    "HP",
@@ -131,7 +131,7 @@ describe OmniAuth::Strategies::Swedbank do
       end.to_app }
 
       it "redirects to /auth/failure with appropriate query params" do
-        post :'/auth/swedbank/callback' # Params are not important, because we're testing public key loading
+        post '/auth/swedbank/callback' # Params are not important, because we're testing public key loading
         expect(last_response.status).to eq(302)
         expect(last_response.headers["Location"]).to eq("/auth/failure?message=public_key_load_err&strategy=swedbank")
       end
@@ -140,7 +140,7 @@ describe OmniAuth::Strategies::Swedbank do
     context "with invalid response" do
 
       it "detects invalid signature" do
-        post :'/auth/swedbank/callback',
+        post '/auth/swedbank/callback',
           "VK_SERVICE" =>   '3003',
           "VK_VERSION" =>   '008',
           "VK_SND_ID" =>    "HP",
@@ -156,7 +156,7 @@ describe OmniAuth::Strategies::Swedbank do
       end
 
       it "detects unsupported VK_SERVICE values" do
-        post :'/auth/swedbank/callback',
+        post '/auth/swedbank/callback',
           "VK_SERVICE" =>   '3004',
           "VK_VERSION" =>   '008',
           "VK_SND_ID" =>    "HP",
@@ -172,7 +172,7 @@ describe OmniAuth::Strategies::Swedbank do
       end
 
       it "detects unsupported VK_VERSION values" do
-        post :'/auth/swedbank/callback',
+        post '/auth/swedbank/callback',
           "VK_SERVICE" =>   '3003',
           "VK_VERSION" =>   '009',
           "VK_SND_ID" =>    "HP",
@@ -188,7 +188,7 @@ describe OmniAuth::Strategies::Swedbank do
       end
 
       it "detects unsupported VK_ENCODING values" do
-        post :'/auth/swedbank/callback',
+        post '/auth/swedbank/callback',
           "VK_SERVICE" =>   '3003',
           "VK_VERSION" =>   '008',
           "VK_SND_ID" =>    "HP",
