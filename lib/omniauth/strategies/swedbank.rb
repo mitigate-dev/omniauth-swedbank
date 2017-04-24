@@ -1,24 +1,13 @@
 require 'omniauth'
 require 'base64'
 
-class String
-  def prepend_length
-    # prepend length to string in 0xx format
-
-    [ self.to_s.length.to_s.rjust(3, '0'), self.dup.to_s.force_encoding("ascii")].join
-  end
-end
-
 module OmniAuth
   module Strategies
     class Swedbank
-      # TODO add support for overriding the VK_LANG parameter
-
       include OmniAuth::Strategy
 
-      AUTH_SERVICE_ID =       "4002"
-      AUTH_SERVICE_VERSION =  "008" # This value must not be used as a number, so as to not lose the padding
-                                    # Padding is important when generating the VK_MAC value
+      AUTH_SERVICE = '4002'
+      AUTH_VERSION = '008'
 
       args [:private_key_file, :public_key_file, :snd_id, :rec_id]
 
@@ -27,27 +16,28 @@ module OmniAuth
       option :snd_id, nil
       option :rec_id, nil
 
-      option :name, "swedbank"
-      option :site, "https://ib.swedbank.lv/banklink"
+      option :name, 'swedbank'
+      option :site, 'https://ib.swedbank.lv/banklink'
 
-      def callback_url
-        full_host + script_name + callback_path
+      def stamp
+        return @stamp if @stamp
+        @stamp = Time.now.strftime('%Y%m%d%H%M%S') + SecureRandom.random_number(999999).to_s.rjust(6, '0')
       end
 
-      def nonce
-        return @nonce if @nonce
-        @nonce = ((full_host.gsub(/[\:\/]/, "X") + SecureRandom.uuid.gsub("-", "")).rjust 50, " ")[-50, 50]
+      def prepend_length(value)
+        # prepend length to string in 0xx format
+        [ value.to_s.length.to_s.rjust(3, '0'), value.dup.to_s.force_encoding('ascii')].join
       end
 
       def signature_input
         [
-          AUTH_SERVICE_ID,              # VK_SERVICE
-          AUTH_SERVICE_VERSION,         # VK_SERVICE
-          options.snd_id,               # VK_SND_ID
-          options.rec_id,               # VK_REC_ID
-          nonce,                        # VK_NONCE
-          callback_url                  # VK_RETURN
-        ].map(&:prepend_length).join
+          AUTH_SERVICE,             # VK_SERVICE
+          AUTH_VERSION,             # VK_VERSION
+          options.snd_id,           # VK_SND_ID
+          options.rec_id,           # VK_REC_ID
+          stamp,                    # VK_NONCE
+          callback_url              # VK_RETURN
+        ].map{|v| prepend_length(v)}.join
       end
 
       def signature(priv_key)
@@ -55,84 +45,84 @@ module OmniAuth
       end
 
       uid do
-        request.params["VK_INFO"].match(/ISIK:(\d{6}\-\d{5})/)[1]
+        request.params['VK_INFO'].match(/ISIK:(\d{6}\-\d{5})/)[1]
       end
 
       info do
         {
-          :full_name => request.params["VK_INFO"].match(/NIMI:(.+)/)[1]
+          full_name: request.params['VK_INFO'].match(/NIMI:(.+)/)[1]
         }
+      end
+
+      extra do
+        { raw_info: request.params }
       end
 
       def callback_phase
         begin
-          pub_key = OpenSSL::X509::Certificate.new(File.read(options.public_key_file || "")).public_key
+          pub_key = OpenSSL::X509::Certificate.new(File.read(options.public_key_file || '')).public_key
         rescue => e
           return fail!(:public_key_load_err, e)
         end
 
-        if request.params["VK_SERVICE"] != "3003"
+        if request.params['VK_SERVICE'] != '3003'
           return fail!(:unsupported_response_service_err)
         end
 
-        if request.params["VK_VERSION"] != "008"
+        if request.params['VK_VERSION'] != '008'
           return fail!(:unsupported_response_version_err)
         end
 
-        if request.params["VK_ENCODING"] != "UTF-8"
+        if request.params['VK_ENCODING'] != 'UTF-8'
           return fail!(:unsupported_response_encoding_err)
         end
 
         sig_str = [
-          request.params["VK_SERVICE"],
-          request.params["VK_VERSION"],
-          request.params["VK_SND_ID"],
-          request.params["VK_REC_ID"],
-          request.params["VK_NONCE"],
-          request.params["VK_INFO"]
-        ].map(&:prepend_length).join
+          request.params['VK_SERVICE'],
+          request.params['VK_VERSION'],
+          request.params['VK_SND_ID'],
+          request.params['VK_REC_ID'],
+          request.params['VK_NONCE'],
+          request.params['VK_INFO']
+        ].map{|v| prepend_length(v)}.join
 
-        raw_signature = Base64.decode64(request.params["VK_MAC"])
+        raw_signature = Base64.decode64(request.params['VK_MAC'])
 
         if !pub_key.verify(OpenSSL::Digest::SHA1.new, raw_signature, sig_str)
           return fail!(:invalid_response_signature_err)
         end
 
         super
-      rescue => e
-        fail!(:unknown_callback_err, e)
       end
 
       def request_phase
         begin
-          priv_key = OpenSSL::PKey::RSA.new(File.read(options.private_key_file || ""))
+          priv_key = OpenSSL::PKey::RSA.new(File.read(options.private_key_file || ''))
         rescue => e
           return fail!(:private_key_load_err, e)
         end
 
-        OmniAuth.config.form_css = nil
-        form = OmniAuth::Form.new(:title => I18n.t("omniauth.swedbank.please_wait"), :url => options.site)
+        form = OmniAuth::Form.new(:title => I18n.t('omniauth.swedbank.please_wait'), :url => options.site)
 
         {
-          "VK_SERVICE" => AUTH_SERVICE_ID,
-          "VK_VERSION" => AUTH_SERVICE_VERSION,
-          "VK_SND_ID" => options.snd_id,
-          "VK_REC_ID" => options.rec_id,
-          "VK_NONCE" => nonce,
-          "VK_RETURN" => callback_url,
-          "VK_LANG" => "LAT",
-          "VK_MAC" => signature(priv_key)
+          'VK_SERVICE' => AUTH_SERVICE,
+          'VK_VERSION' => AUTH_VERSION,
+          'VK_SND_ID' => options.snd_id,
+          'VK_REC_ID' => options.rec_id,
+          'VK_NONCE' => stamp,
+          'VK_RETURN' => callback_url,
+          'VK_MAC' => signature(priv_key),
+          'VK_LANG' => 'LAT',
+          'VK_ENCODING' => 'UTF-8'
         }.each do |name, val|
           form.html "<input type=\"hidden\" name=\"#{name}\" value=\"#{val}\" />"
         end
 
-        form.button I18n.t("omniauth.swedbank.click_here_if_not_redirected")
+        form.button I18n.t('omniauth.swedbank.click_here_if_not_redirected')
 
-        form.instance_variable_set("@html",
-          form.to_html.gsub("</form>", "</form><script type=\"text/javascript\">document.forms[0].submit();</script>"))
+        form.instance_variable_set('@html',
+          form.to_html.gsub('</form>', '</form><script type="text/javascript">document.forms[0].submit();</script>'))
         form.to_response
-      rescue => e
-        fail!(:unknown_request_err, e)
       end
     end
   end
