@@ -38,6 +38,7 @@ Rails.application.config.middleware.use OmniAuth::Builder do
     File.read("path/to/private.key"),
     File.read("path/to/bank.crt"),
     ENV['SWEDBANK_SND_ID'],
+    ENV['SWEDBANK_REC_ID']
 end
 ```
 
@@ -54,20 +55,14 @@ Here's an example Auth Hash available in `request.env['omniauth.auth']`:
   },
   extra: {
     raw_info: {
-      VK_SERVICE: '2001',
-      VK_VERSION: '101',
-      VK_SND_ID: 'RIKOLV2X',
-      VK_REC_ID: '10..',
-      VK_STAMP: '20170403112855087471',
-      VK_T_NO: '616365957',
-      VK_PER_CODE: '374042-80367',
-      VK_PER_FNAME: 'ARNIS',
-      VK_PER_LNAME: 'RAITUMS',
-      VK_COM_CODE: '',
-      VK_COM_NAME: '',
-      VK_TIME: '20170403113328',
-      VK_MAC: 'SkYmH5AFI6Av ...',
-      VK_LANG: 'LAT'
+      VK_SERVICE: '3003',
+      VK_VERSION: '008',
+      VK_SND_ID: 'HP',
+      VK_REC_ID: 'MPLMT',
+      VK_NONCE: '20170425114529204413',
+      VK_INFO: 'ISIK:090482-12549;NIMI:DACE ĀBOLA',
+      VK_MAC: 'qrEMRf6YV...',
+      VK_ENCODING: 'UTF-8
     }
   }
 }
