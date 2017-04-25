@@ -2,17 +2,15 @@ require 'spec_helper'
 
 describe OmniAuth::Strategies::Swedbank do
 
-  PRIVATE_KEY_FILE = File.join RSpec.configuration.cert_folder, 'request.private.pem'
-  PUBLIC_KEY_FILE = File.join RSpec.configuration.cert_folder, 'response.public.pem'
+  PRIVATE_KEY = File.read(File.join(RSpec.configuration.cert_folder, 'request.private.pem'))
+  PUBLIC_KEY = File.read(File.join(RSpec.configuration.cert_folder, 'response.public.pem'))
 
   let(:app){ Rack::Builder.new do |b|
     b.use Rack::Session::Cookie, {secret: 'abc123'}
-    b.use(OmniAuth::Strategies::Swedbank, PRIVATE_KEY_FILE, PUBLIC_KEY_FILE, 'MY_SND_ID', 'MY_REC_ID')
+    b.use(OmniAuth::Strategies::Swedbank, PRIVATE_KEY, PUBLIC_KEY, 'MY_SND_ID', 'MY_REC_ID')
     b.run lambda{|env| [404, {}, ['Not Found']]}
   end.to_app }
 
-  let(:private_key) { OpenSSL::PKey::RSA.new(File.read(PRIVATE_KEY_FILE)) }
-  let(:public_key) { OpenSSL::PKey::RSA.new(File.read(PUBLIC_KEY_FILE)) }
   let(:last_response_nonce) { last_response.body.match(/name="VK_NONCE" value="([^"]*)"/)[1] }
   let(:last_response_mac) { last_response.body.match(/name="VK_MAC" value="([^"]*)"/)[1] }
 
@@ -56,6 +54,7 @@ describe OmniAuth::Strategies::Swedbank do
         "020#{last_response_nonce}" +  # VK_NONCE
         "041#{EXPECTED_VALUES['VK_RETURN']}"  # V_RETURN
 
+      private_key = OpenSSL::PKey::RSA.new(PRIVATE_KEY)
       expected_mac = Base64.encode64(private_key.sign(OpenSSL::Digest::SHA1.new, sig_str))
       expect(last_response_mac).to eq(expected_mac)
     end
@@ -73,7 +72,7 @@ describe OmniAuth::Strategies::Swedbank do
     context 'with custom options' do
       let(:app){ Rack::Builder.new do |b|
         b.use Rack::Session::Cookie, {secret: 'abc123'}
-        b.use(OmniAuth::Strategies::Swedbank, PRIVATE_KEY_FILE, PUBLIC_KEY_FILE, 'MY_SND_ID', 'MY_REC_ID',
+        b.use(OmniAuth::Strategies::Swedbank, PRIVATE_KEY, PUBLIC_KEY, 'MY_SND_ID', 'MY_REC_ID',
           site: 'https://test.lv/banklink')
         b.run lambda{|env| [404, {}, ['Not Found']]}
       end.to_app }
@@ -86,7 +85,7 @@ describe OmniAuth::Strategies::Swedbank do
     context 'with non-existant private key files' do
       let(:app){ Rack::Builder.new do |b|
         b.use Rack::Session::Cookie, {secret: 'abc123'}
-        b.use(OmniAuth::Strategies::Swedbank, 'missing-private-key-file.pem', PUBLIC_KEY_FILE, 'MY_SND_ID', 'MY_REC_ID')
+        b.use(OmniAuth::Strategies::Swedbank, 'missing-private-key-file.pem', PUBLIC_KEY, 'MY_SND_ID', 'MY_REC_ID')
         b.run lambda{|env| [404, {}, ['Not Found']]}
       end.to_app }
 
@@ -126,7 +125,7 @@ describe OmniAuth::Strategies::Swedbank do
     context 'with non-existant public key file' do
       let(:app){ Rack::Builder.new do |b|
         b.use Rack::Session::Cookie, {secret: 'abc123'}
-        b.use(OmniAuth::Strategies::Swedbank, PRIVATE_KEY_FILE, 'missing-public-key-file.pem', 'MY_SND_ID', 'MY_REC_ID')
+        b.use(OmniAuth::Strategies::Swedbank, PRIVATE_KEY, 'missing-public-key-file.pem', 'MY_SND_ID', 'MY_REC_ID')
         b.run lambda{|env| [404, {}, ['Not Found']]}
       end.to_app }
 

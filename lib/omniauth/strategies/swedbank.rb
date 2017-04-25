@@ -9,10 +9,10 @@ module OmniAuth
       AUTH_SERVICE = '4002'
       AUTH_VERSION = '008'
 
-      args [:private_key_file, :public_key_file, :snd_id, :rec_id]
+      args [:private_key, :public_key, :snd_id, :rec_id]
 
-      option :private_key_file, nil
-      option :public_key_file, nil
+      option :private_key, nil
+      option :public_key, nil
       option :snd_id, nil
       option :rec_id, nil
 
@@ -60,7 +60,7 @@ module OmniAuth
 
       def callback_phase
         begin
-          pub_key = OpenSSL::X509::Certificate.new(File.read(options.public_key_file || '')).public_key
+          pub_key = OpenSSL::X509::Certificate.new(options.public_key).public_key
         rescue => e
           return fail!(:public_key_load_err, e)
         end
@@ -97,7 +97,7 @@ module OmniAuth
 
       def request_phase
         begin
-          priv_key = OpenSSL::PKey::RSA.new(File.read(options.private_key_file || ''))
+          priv_key = OpenSSL::PKey::RSA.new(options.private_key)
         rescue => e
           return fail!(:private_key_load_err, e)
         end
