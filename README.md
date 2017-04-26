@@ -9,6 +9,7 @@ Supported Ruby versions: 2.2+
 
 ## Related projects
 
+- [omniauth-citadele](https://github.com/mak-it/omniauth-citadele) - strategy for authenticating with Citadele
 - [omniauth-dnb](https://github.com/mak-it/omniauth-dnb) - strategy for authenticating with DNB
 - [omniauth-nordea](https://github.com/mak-it/omniauth-nordea) - strategy for authenticating with Nordea
 
