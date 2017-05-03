@@ -12,7 +12,7 @@ Supported Ruby versions: 2.2+
 - [omniauth-citadele](https://github.com/mak-it/omniauth-citadele) - strategy for authenticating with Citadele
 - [omniauth-dnb](https://github.com/mak-it/omniauth-dnb) - strategy for authenticating with DNB
 - [omniauth-nordea](https://github.com/mak-it/omniauth-nordea) - strategy for authenticating with Nordea
-
+- [omniauth-seb-elink](https://github.com/mak-it/omniauth-seb-elink) - strategy for authenticating with SEB
 
 ## Installation
 
