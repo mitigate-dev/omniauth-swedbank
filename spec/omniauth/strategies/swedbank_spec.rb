@@ -61,11 +61,11 @@ describe OmniAuth::Strategies::Swedbank do
 
     context 'with default options' do
       it 'has the default action tag value' do
-        expect(last_response.body).to be_include("action='https://ib.swedbank.lv/banklink'")
+        expect(last_response.body).to be_include("action='https://www.swedbank.lv/banklink'")
       end
 
       it 'has the default VK_LANG value' do
-        expect(last_response.body).to be_include("action='https://ib.swedbank.lv/banklink'")
+        expect(last_response.body).to be_include("action='https://www.swedbank.lv/banklink'")
       end
     end
 

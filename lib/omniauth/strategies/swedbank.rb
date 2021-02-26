@@ -17,7 +17,7 @@ module OmniAuth
       option :rec_id, nil
 
       option :name, 'swedbank'
-      option :site, 'https://ib.swedbank.lv/banklink'
+      option :site, 'https://www.swedbank.lv/banklink'
 
       def stamp
         return @stamp if @stamp
