@@ -9,6 +9,14 @@ module OmniAuth
       AUTH_SERVICE = '4002'
       AUTH_VERSION = '008'
 
+      def self.render_nonce?
+         defined?(ActionDispatch::ContentSecurityPolicy::Request) != nil
+      end
+      if render_nonce?
+        include ActionDispatch::ContentSecurityPolicy::Request
+        delegate :get_header, :set_header, to: :request
+      end
+
       args [:private_key, :public_key, :snd_id, :rec_id]
 
       option :private_key, nil
@@ -120,9 +128,19 @@ module OmniAuth
 
         form.button I18n.t('omniauth.swedbank.click_here_if_not_redirected')
 
+        nonce_attribute = nil
+        if self.class.render_nonce?
+          nonce_attribute = " nonce='#{escape(content_security_policy_nonce)}'"
+        end
         form.instance_variable_set('@html',
-          form.to_html.gsub('</form>', '</form><script type="text/javascript">document.forms[0].submit();</script>'))
+          form.to_html.gsub('</form>', "</form><script type=\"text/javascript\"#{nonce_attribute}>document.forms[0].submit();</script>"))
         form.to_response
+      end
+
+      private
+
+      def escape(html_attribute_value)
+         CGI.escapeHTML(html_attribute_value) unless html_attribute_value.nil?
       end
     end
   end
