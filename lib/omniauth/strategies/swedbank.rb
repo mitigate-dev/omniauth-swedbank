@@ -123,7 +123,7 @@ module OmniAuth
           'VK_LANG' => 'LAT',
           'VK_ENCODING' => 'UTF-8'
         }.each do |name, val|
-          form.html "<input type=\"hidden\" name=\"#{name}\" value=\"#{val}\" />"
+          form.html "<input type=\"hidden\" name=\"#{name}\" value=\"#{escape(val)}\" />"
         end
 
         form.button I18n.t('omniauth.swedbank.click_here_if_not_redirected')

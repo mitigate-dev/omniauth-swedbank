@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'rack-protection'
 
 describe OmniAuth::Strategies::Swedbank do
 
@@ -10,6 +11,8 @@ describe OmniAuth::Strategies::Swedbank do
     b.use(OmniAuth::Strategies::Swedbank, PRIVATE_KEY, PUBLIC_KEY, 'MY_SND_ID', 'MY_REC_ID')
     b.run lambda{|env| [404, {}, ['Not Found']]}
   end.to_app }
+
+  let(:token){ Rack::Protection::AuthenticityToken.random_token }
 
   let(:last_response_nonce) { last_response.body.match(/name="VK_NONCE" value="([^"]*)"/)[1] }
   let(:last_response_mac) { last_response.body.match(/name="VK_MAC" value="([^"]*)"/)[1] }
@@ -23,7 +26,14 @@ describe OmniAuth::Strategies::Swedbank do
       'VK_RETURN' =>  'http://example.org/auth/swedbank/callback'
     }
 
-    before(:each){ get '/auth/swedbank' }
+    before(:each) do
+      post(
+        '/auth/swedbank',
+        {},
+        'rack.session' => {csrf: token},
+        'HTTP_X_CSRF_TOKEN' => token
+      )
+    end
 
     it 'displays a single form' do
       expect(last_response.status).to eq(200)
