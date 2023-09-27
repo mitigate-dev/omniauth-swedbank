@@ -2,10 +2,7 @@
 
 Omniauth strategy for using Swedbank as an authentication service provider.
 
-[![Gem Version](https://badge.fury.io/rb/omniauth-swedbank.png)](http://badge.fury.io/rb/omniauth-swedbank)
-[![Build Status](https://travis-ci.org/mitigate-dev/omniauth-swedbank.svg?branch=master)](https://travis-ci.org/mitigate-dev/omniauth-swedbank)
-
-Supported Ruby versions: 2.2+
+Supported Ruby versions: 2.7+
 
 ## Related projects
 
