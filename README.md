@@ -3,21 +3,22 @@
 Omniauth strategy for using Swedbank as an authentication service provider.
 
 [![Gem Version](https://badge.fury.io/rb/omniauth-swedbank.png)](http://badge.fury.io/rb/omniauth-swedbank)
-[![Build Status](https://travis-ci.org/mak-it/omniauth-swedbank.svg?branch=master)](https://travis-ci.org/mak-it/omniauth-swedbank)
+[![Build Status](https://travis-ci.org/mitigate-dev/omniauth-swedbank.svg?branch=master)](https://travis-ci.org/mitigate-dev/omniauth-swedbank)
 
 Supported Ruby versions: 2.2+
 
 ## Related projects
 
-- [omniauth-citadele](https://github.com/mak-it/omniauth-citadele) - strategy for authenticating with Citadele
-- [omniauth-dnb](https://github.com/mak-it/omniauth-dnb) - strategy for authenticating with DNB
-- [omniauth-nordea](https://github.com/mak-it/omniauth-nordea) - strategy for authenticating with Nordea
-- [omniauth-seb-elink](https://github.com/mak-it/omniauth-seb-elink) - strategy for authenticating with SEB
+- [omniauth-citadele](https://github.com/mitigate-dev/omniauth-citadele) - strategy for authenticating with Citadele
+- [omniauth-dnb](https://github.com/mitigate-dev/omniauth-dnb) - strategy for authenticating with DNB
+- [omniauth-nordea](https://github.com/mitigate-dev/omniauth-nordea) - strategy for authenticating with Nordea
+- [omniauth-seb-elink](https://github.com/mitigate-dev/omniauth-seb-elink) - strategy for authenticating with SEB
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Add these lines to your application's Gemfile (omniauth-rails_csrf_protection is required if using Rails):
 
+    gem 'omniauth-rails_csrf_protection'
     gem 'omniauth-swedbank'
 
 And then execute:
@@ -26,7 +27,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install omniauth-swedbank
+    $ gem install omniauth-rails_csrf_protection omniauth-swedbank
 
 ## Usage
 

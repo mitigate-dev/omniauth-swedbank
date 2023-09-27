@@ -9,6 +9,14 @@ module OmniAuth
       AUTH_SERVICE = '4002'
       AUTH_VERSION = '008'
 
+      def self.render_nonce?
+         defined?(ActionDispatch::ContentSecurityPolicy::Request) != nil
+      end
+      if render_nonce?
+        include ActionDispatch::ContentSecurityPolicy::Request
+        delegate :get_header, :set_header, to: :request
+      end
+
       args [:private_key, :public_key, :snd_id, :rec_id]
 
       option :private_key, nil
@@ -102,6 +110,8 @@ module OmniAuth
           return fail!(:private_key_load_err, e)
         end
 
+        set_locale_from_query_param
+
         form = OmniAuth::Form.new(:title => I18n.t('omniauth.swedbank.please_wait'), :url => options.site)
 
         {
@@ -112,17 +122,44 @@ module OmniAuth
           'VK_NONCE' => stamp,
           'VK_RETURN' => callback_url,
           'VK_MAC' => signature(priv_key),
-          'VK_LANG' => 'LAT',
+          'VK_LANG' => resolve_bank_ui_language,
           'VK_ENCODING' => 'UTF-8'
         }.each do |name, val|
-          form.html "<input type=\"hidden\" name=\"#{name}\" value=\"#{val}\" />"
+          form.html "<input type=\"hidden\" name=\"#{name}\" value=\"#{escape(val)}\" />"
         end
 
         form.button I18n.t('omniauth.swedbank.click_here_if_not_redirected')
 
+        nonce_attribute = nil
+        if self.class.render_nonce?
+          nonce_attribute = " nonce='#{escape(content_security_policy_nonce)}'"
+        end
         form.instance_variable_set('@html',
-          form.to_html.gsub('</form>', '</form><script type="text/javascript">document.forms[0].submit();</script>'))
+          form.to_html.gsub('</form>', "</form><script type=\"text/javascript\"#{nonce_attribute}>document.forms[0].submit();</script>"))
         form.to_response
+      end
+
+      private
+
+      def set_locale_from_query_param
+        locale = request.params['locale']
+        if (locale != nil && locale.strip != '' && I18n.locale_available?(locale))
+          I18n.locale = locale
+        end
+      end
+
+      def resolve_bank_ui_language
+        case I18n.locale
+        when :ru then 'RUS'
+        when :en then 'ENG'
+        when :et then 'EST'
+        when :lt then 'LIT'
+        else 'LAT'
+        end
+      end
+
+      def escape(html_attribute_value)
+         CGI.escapeHTML(html_attribute_value) unless html_attribute_value.nil?
       end
     end
   end
