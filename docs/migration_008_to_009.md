@@ -13,7 +13,7 @@ Swedbank will shut down banklink protocol v008 on **2026-06-02**. After this dat
 | Response service code | 3003 | 3013 |
 | VK_SND_ID in response | HP | SWEDBANK_LV |
 | Bank certificate | Country-specific (LV) | Unified Baltic |
-| Min. key strength | 1024 bits | 2048 bits |
+| Min. key strength | 1024 bits | 2048 bits (recommended 4096) |
 | Response user data | VK_INFO (combined string) | VK_USER_NAME, VK_USER_ID, VK_COUNTRY, VK_OTHER, VK_TOKEN |
 | New request fields | - | VK_DATETIME, VK_RID |
 
@@ -37,13 +37,13 @@ Replace your existing Swedbank public certificate file with the new one.
 
 ### 3. Check your private key
 
-Your RSA private key must be at least **2048 bits**. Check with:
+Your RSA private key must be at least **2048 bits** (recommended: **4096 bits**). Keys must be regenerated every **24 months**. Check your key size with:
 
 ```bash
 openssl rsa -in your_private_key.pem -text -noout | head -1
 ```
 
-If it shows less than 2048 bits, generate a new keypair via the "Update key" functionality in the [Swedbank Solution support page](https://www.swedbank.lv/business/cash/banklink/integrate).
+If it shows less than 2048 bits or is older than 2 years, generate a new keypair via the "Update key" functionality in the [Swedbank Solution support page](https://www.swedbank.lv/business/cash/banklink/integrate).
 
 ### 4. Update your provider configuration
 
