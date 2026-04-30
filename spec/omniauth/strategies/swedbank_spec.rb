@@ -54,7 +54,7 @@ describe OmniAuth::Strategies::Swedbank do
         end
       end
 
-      it 'has a 50 byte long nonce field value' do
+      it 'has a 20 byte long nonce field value' do
         expect(last_response_nonce.bytesize).to eq(20)
       end
 
