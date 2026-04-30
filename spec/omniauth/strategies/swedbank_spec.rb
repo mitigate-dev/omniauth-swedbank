@@ -72,6 +72,14 @@ describe OmniAuth::Strategies::Swedbank do
         expect(last_response_mac).to eq(expected_mac)
       end
 
+      it 'does not include VK_DATETIME field' do
+        expect(last_response.body).not_to include('name="VK_DATETIME"')
+      end
+
+      it 'does not include VK_RID field' do
+        expect(last_response.body).not_to include('name="VK_RID"')
+      end
+
       it 'outputs a deprecation warning' do
         expect { post('/auth/swedbank', {}, 'rack.session' => {csrf: token}, 'HTTP_X_CSRF_TOKEN' => token) }
           .to output(/DEPRECATION.*v008.*2026-06-02/).to_stderr
@@ -110,6 +118,27 @@ describe OmniAuth::Strategies::Swedbank do
         it 'redirects to /auth/failure with appropriate query params' do
           expect(last_response.status).to eq(302)
           expect(last_response.headers['Location']).to eq('/auth/failure?message=private_key_load_err&strategy=swedbank')
+        end
+      end
+
+      context 'with invalid version' do
+        let(:app){ Rack::Builder.new do |b|
+          b.use Rack::Session::Cookie, {secret: '5242e6bd9daf0e9645c2d4e22b11ba8cee0bed44439906d5f1bd5dad409d8637'}
+          b.use(OmniAuth::Strategies::Swedbank, PRIVATE_KEY, PUBLIC_KEY, 'MY_SND_ID', 'MY_REC_ID',
+            version: '010')
+          b.run lambda{|env| [404, {}, ['Not Found']]}
+        end.to_app }
+
+        it 'fails with unsupported_version_err on request phase' do
+          post('/auth/swedbank', {}, 'rack.session' => {csrf: token}, 'HTTP_X_CSRF_TOKEN' => token)
+          expect(last_response.status).to eq(302)
+          expect(last_response.headers['Location']).to eq('/auth/failure?message=unsupported_version_err&strategy=swedbank')
+        end
+
+        it 'fails with unsupported_version_err on callback phase' do
+          post '/auth/swedbank/callback', 'VK_SERVICE' => '3003'
+          expect(last_response.status).to eq(302)
+          expect(last_response.headers['Location']).to eq('/auth/failure?message=unsupported_version_err&strategy=swedbank')
         end
       end
     end
@@ -353,6 +382,23 @@ describe OmniAuth::Strategies::Swedbank do
 
         it 'sets the correct info.country value in the auth hash' do
           expect(auth_hash.info.country).to eq('LV')
+        end
+
+        it 'includes all v009 params in extra.raw_info' do
+          expect(auth_hash.extra.raw_info).to include(
+            'VK_SERVICE' => '3013',
+            'VK_VERSION' => '009',
+            'VK_SND_ID' => 'SWEDBANK_LV',
+            'VK_USER_NAME' => 'Example User',
+            'VK_USER_ID' => '123456-12345',
+            'VK_COUNTRY' => 'LV',
+            'VK_TOKEN' => '7',
+            'VK_RID' => ''
+          )
+        end
+
+        it 'does not include VK_INFO in extra.raw_info' do
+          expect(auth_hash.extra.raw_info).not_to have_key('VK_INFO')
         end
       end
 

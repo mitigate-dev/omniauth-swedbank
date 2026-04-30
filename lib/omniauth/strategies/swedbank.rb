@@ -30,8 +30,14 @@ module OmniAuth
       option :site, 'https://www.swedbank.lv/banklink'
       option :version, '008'
 
+      SUPPORTED_VERSIONS = %w[008 009].freeze
+
       def version_009?
         options.version == '009'
+      end
+
+      def invalid_version?
+        !SUPPORTED_VERSIONS.include?(options.version)
       end
 
       def auth_service
@@ -119,6 +125,11 @@ module OmniAuth
       end
 
       def callback_phase
+        if invalid_version?
+          return fail!(:unsupported_version_err,
+            ArgumentError.new("Unsupported banklink version '#{options.version}'. Supported: #{SUPPORTED_VERSIONS.join(', ')}"))
+        end
+
         begin
           pub_key = OpenSSL::X509::Certificate.new(options.public_key).public_key
         rescue => e
@@ -173,6 +184,11 @@ module OmniAuth
       end
 
       def request_phase
+        if invalid_version?
+          return fail!(:unsupported_version_err,
+            ArgumentError.new("Unsupported banklink version '#{options.version}'. Supported: #{SUPPORTED_VERSIONS.join(', ')}"))
+        end
+
         begin
           priv_key = OpenSSL::PKey::RSA.new(options.private_key)
         rescue => e
