@@ -43,7 +43,12 @@ Your RSA private key must be at least **2048 bits** (recommended: **4096 bits**)
 openssl rsa -in your_private_key.pem -text -noout | head -1
 ```
 
-If it shows less than 2048 bits or is older than 2 years, generate a new keypair via the "Update key" functionality in the [Swedbank Solution support page](https://www.swedbank.lv/business/cash/banklink/integrate).
+If it shows less than 2048 bits or is older than 2 years, generate a new keypair. See [Keypair Change Instruction (PDF)](https://swedbank.lv/static/pdf/business/d2d/collection/keypair_change_instruction_LV.pdf) for detailed steps. Two options:
+
+- **Option A:** Use Swedbank's built-in keypair generator via the [support page](https://www.swedbank.lv/business/cash/banklink/integrate) (recommended). Log in, go to "My agreements", click "Update key" -> "Generate new key". Download and save the private key immediately — the bank does not store it.
+- **Option B:** Generate your own keypair and upload the public key via self-service or email it to cashmanagement@swedbank.lv.
+
+Note: When replacing keys, you can choose a transition period (up to 7 days) during which both old and new keys are valid.
 
 ### 4. Update your provider configuration
 
