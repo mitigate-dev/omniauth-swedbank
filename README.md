@@ -26,6 +26,10 @@ Or install it yourself as:
 
     $ gem install omniauth-rails_csrf_protection omniauth-swedbank
 
+## v009 Migration
+
+**Swedbank will shut down banklink protocol v008 on 2026-06-02.** See [Migration Guide](docs/migration_008_to_009.md) for details.
+
 ## Usage
 
 Here's a quick example, adding the middleware to a Rails app
@@ -37,13 +41,47 @@ Rails.application.config.middleware.use OmniAuth::Builder do
     File.read("path/to/private.key"),
     File.read("path/to/bank.crt"),
     ENV['SWEDBANK_SND_ID'],
-    ENV['SWEDBANK_REC_ID']
+    ENV['SWEDBANK_REC_ID'],
+    version: '009'
 end
 ```
 
+The `version` option defaults to `'008'` for backward compatibility. Set it to `'009'` when you're ready to migrate (requires a new bank certificate from [banklink.swedbank.com](https://banklink.swedbank.com/public/resources/bank-certificates/009)).
+
 ## Auth Hash
 
-Here's an example Auth Hash available in `request.env['omniauth.auth']`:
+### v009
+
+```ruby
+{
+  provider: 'swedbank',
+  uid: '374042-80367',
+  info: {
+    full_name: 'ARNIS RAITUMS',
+    country: 'LV'
+  },
+  extra: {
+    raw_info: {
+      VK_SERVICE: '3013',
+      VK_VERSION: '009',
+      VK_DATETIME: '2026-04-29T12:00:00+0300',
+      VK_SND_ID: 'SWEDBANK_LV',
+      VK_REC_ID: 'MPLMT',
+      VK_NONCE: '20170425114529204413',
+      VK_USER_NAME: 'ARNIS RAITUMS',
+      VK_USER_ID: '374042-80367',
+      VK_COUNTRY: 'LV',
+      VK_OTHER: '',
+      VK_TOKEN: '7',
+      VK_RID: '',
+      VK_MAC: 'qrEMRf6YV...',
+      VK_ENCODING: 'UTF-8'
+    }
+  }
+}
+```
+
+### v008 (deprecated)
 
 ```ruby
 {
@@ -61,7 +99,7 @@ Here's an example Auth Hash available in `request.env['omniauth.auth']`:
       VK_NONCE: '20170425114529204413',
       VK_INFO: 'ISIK:090482-12549;NIMI:DACE ĀBOLA',
       VK_MAC: 'qrEMRf6YV...',
-      VK_ENCODING: 'UTF-8
+      VK_ENCODING: 'UTF-8'
     }
   }
 }
