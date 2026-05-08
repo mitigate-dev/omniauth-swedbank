@@ -2,7 +2,7 @@
 
 Omniauth strategy for using Swedbank as an authentication service provider.
 
-Supported Ruby versions: 2.7+
+Supported Ruby versions: 3.1+
 
 ## Related projects
 
